@@ -1,7 +1,12 @@
 {
-  "_说明": "各角色子代理使用的模型 ID。null 表示不指定,跟随会话默认模型。安装时由 install.ps1 写入对应 agent JSON 的 model 字段。ID 必须与 Kiro 当前可用模型一致,可在会话里用 /model 查看,或运行 kiro-cli chat --list-models --format json。官方文档示例里出现过的 ID 写法如 claude-sonnet-4.6。模型不可用时首个提示会直接失败且不会自动回退,流程的预检冒烟会发现并把该角色降级为内联执行。",
   "explorer": "claude-haiku-4.5",
   "planner": "claude-haiku-4.5",
   "coder": "claude-haiku-4.5",
-  "reviewer": "claude-haiku-4.5"
+  "reviewer": "claude-haiku-4.5",
+  "_用途说明": {
+    "explorer": "tech 阶段只读探索源码,产出报告供 planner/coder 使用,不写代码,用低成本模型即可",
+    "planner": "code 阶段生成实现计划(任务拆分、测试先行步骤),不写业务代码",
+    "coder": "code 阶段实现代码、review 阶段按报告修复问题,是写源码的角色",
+    "reviewer": "review 阶段审查代码质量、安全、规范,建议用能力更强的模型"
+  }
 }
