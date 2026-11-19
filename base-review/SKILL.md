@@ -21,7 +21,8 @@ description: 代码审查阶段。代码已完成、要做审查时使用:对功
 ## 1. 审查
 
 1. 按 repo 预计算审查范围。**首轮(或从 stale / 回退重做进入)审全量** `diffRange = {baseCommit}..HEAD`;**修复后的重审只审增量** `diffRange = {fixBase.{repo}}..HEAD`(`fixBase` 是上一步修复开始前的 HEAD,见 §3.1),范围缩小所以成本随轮次下降。`changedFiles = git -C {repo} diff --name-status {diffRange}`。
-   - 全量首轮时,没圈定修复的问题会自然再次出现,不用单独记"遗留";增量轮只核对本轮圈定的编号是否修好、是否引入新问题。
+   - **增量只在上轮的修复覆盖了该 group 全部未豁免的 high / medium 时使用**(即这些编号都在 `fixIds` 里)。否则(如用户选了"仅 high"或自选编号,留下了 medium)该 group 改审全量,未圈定的问题会自然再次出现,不会被增量范围漏掉。未修的 low 不影响这个判断。
+   - 增量轮只核对本轮圈定的编号是否修好、是否引入新问题。
    - 标记为 `blocked` 或上轮未完成的 group 不参与增量,仍审全量。
    - **增量轮只重派本轮修过的 group**(该 group 有待修编号,且 `git -C {repo} rev-list --count {fixBase.{repo}}..HEAD` > 0);其余 group 的 `reports.{g}` 原样沿用,不重派。
 2. 读 `references/brief-review.md`,每个 group 一份任务单写到 `{flowDir}/briefs/review-{g}-r{round}.md`(`round = fixRound + 1`),委派 reviewer 角色 `base-reviewer`(预检见 §5.2)。变量:`group`、`workDir`、`branch`、`diffRange`、`design`(`tech-design-{g}.md`)、`changedFiles`、`scopeAdditions`(`stages.code.scopeAdditions` 中该 group 的,file + reason 一行一个,无则"无")、`waived`(`stages.review.waived.{g}`,file + 问题 + 理由一行一个,无则"无")、`round`、`scope`(`全量` / `增量`)、`fixIds` 与 `prevReport`(增量轮填上轮圈定的编号和上轮报告路径,全量轮填"无")、`reportPath`(`round=1` → `review-{g}.md`,否则 `review-{g}-r{round}.md`,均在 `{flowDir}` 下,**每轮单独成文件,不覆盖**)。
