@@ -1,0 +1,7 @@
+{
+  "_说明": "各角色子代理使用的模型 ID。null 表示不指定,跟随会话默认模型。安装时由 install.ps1 写入对应 agent JSON 的 model 字段。ID 必须与 Kiro 当前可用模型一致,可在会话里用 /model 查看,或运行 kiro-cli chat --list-models --format json。官方文档示例里出现过的 ID 写法如 claude-sonnet-4.6。模型不可用时首个提示会直接失败且不会自动回退,流程的预检冒烟会发现并把该角色降级为内联执行。",
+  "explorer": "claude-haiku-4.5",
+  "planner": "claude-haiku-4.5",
+  "coder": "claude-haiku-4.5",
+  "reviewer": "claude-haiku-4.5"
+}
