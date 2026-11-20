@@ -1,6 +1,6 @@
 # 任务单:代码探索 {{group}}
 
-> 主会话把 `{{变量}}` 替换成实际值后写入 `{flowDir}/briefs/explore-{group}.md`,再委派给 base-explorer,或内联执行。
+> 主会话把 `{{变量}}` 替换成实际值后,把全文作为委派消息直接发给 base-explorer(不写文件),或内联执行。
 
 探索 `{{group}}`(type=`{{groupType}}`)的现有代码,为技术方案提供事实基础。**只读,不改任何源码。**
 

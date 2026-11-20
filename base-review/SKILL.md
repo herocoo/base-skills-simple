@@ -25,7 +25,7 @@ description: 代码审查阶段。代码已完成、要做审查时使用:对功
    - 增量轮只核对本轮圈定的编号是否修好、是否引入新问题。
    - 标记为 `blocked` 或上轮未完成的 group 不参与增量,仍审全量。
    - **增量轮只重派本轮修过的 group**(该 group 有待修编号,且 `git -C {repo} rev-list --count {fixBase.{repo}}..HEAD` > 0);其余 group 的 `reports.{g}` 原样沿用,不重派。
-2. 读 `references/brief-review.md`,每个 group 一份任务单写到 `{flowDir}/briefs/review-{g}-r{round}.md`(`round = fixRound + 1`),委派 reviewer 角色 `base-reviewer`(预检见 §5.2)。变量:`group`、`workDir`、`branch`、`diffRange`、`design`(`tech-design-{g}.md`)、`changedFiles`、`scopeAdditions`(`stages.code.scopeAdditions` 中该 group 的,file + reason 一行一个,无则"无")、`waived`(`stages.review.waived.{g}`,file + 问题 + 理由一行一个,无则"无")、`round`、`scope`(`全量` / `增量`)、`fixIds` 与 `prevReport`(增量轮填上轮圈定的编号和上轮报告路径,全量轮填"无")、`reportPath`(`round=1` → `review-{g}.md`,否则 `review-{g}-r{round}.md`,均在 `{flowDir}` 下,**每轮单独成文件,不覆盖**)。
+2. 读 `references/brief-review.md`,每个 group 一份任务单(`round = fixRound + 1`),按协议 §5.3 委派 reviewer 角色 `base-reviewer`(预检见 §5.2)。变量:`group`、`workDir`、`branch`、`diffRange`、`design`(`tech-design-{g}.md`)、`changedFiles`、`scopeAdditions`(`stages.code.scopeAdditions` 中该 group 的,file + reason 一行一个,无则"无")、`waived`(`stages.review.waived.{g}`,file + 问题 + 理由一行一个,无则"无")、`round`、`scope`(`全量` / `增量`)、`fixIds`(增量轮填上轮圈定的编号,全量轮填"无")、`reportPath`(`{flowDir}/review-{g}.md`,**每轮覆盖同一文件**;增量轮由 reviewer 先读旧报告再覆盖,豁免以 `waived` 为准,不靠旧报告)。
 3. 各 group 互不依赖且只读,按 §5.3 并行(≤3 个,多了分批);内联时逐个。
 4. 核对返回值(`result` / `report` / `counts` 齐全,报告文件存在),写 `reports.{g} = { path, result, round }`。
 
@@ -49,7 +49,7 @@ description: 代码审查阶段。代码已完成、要做审查时使用:对功
 ## 3. 自动修复并重审
 
 1. 每个涉及的 repo 记 `fixBase.{repo} = git -C {repo} rev-parse HEAD`。
-2. 读 `references/brief-fix.md`,每个 group 一份任务单写到 `{flowDir}/briefs/fix-{g}-r{round}.md`,委派 coder 角色 `base-coder`。变量:`group`、`workDir`、`branch`、`report`(该 group 本轮报告路径)、`planPath`、`fixIds`、`round`。**修复写源码:同一 repo 内串行;不同 repo 的单元在同一条消息内并行(≤3)**。
+2. 读 `references/brief-fix.md`,每个 group 一份任务单,按协议 §5.3 委派 coder 角色 `base-coder`。变量:`group`、`workDir`、`branch`、`report`(该 group 的报告 `review-{g}.md`)、`planPath`、`fixIds`、`round`。**修复写源码:同一 repo 内串行;不同 repo 的单元在同一条消息内并行(≤3)**。
 3. 核对返回值:
    - `checks` 含 `fail` 却报 `done` → 按 `blocked`(审查不跑测试,带着失败过闸门会合进主分支)。
    - `blocked` → 先做第 4 步核实已落地的提交,再问 `补信息后重派` / `回退到 base-code` / `取消`。

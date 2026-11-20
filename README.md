@@ -13,7 +13,7 @@
 | 子代理 | 三个专用 agent,按 `general-purpose` 兜底 | 四个角色 agent(JSON):`base-explorer` / `base-planner` / `base-coder` / `base-reviewer`,配合任务单;**先预检再用,不可用就内联**,流程不依赖它 |
 | 模型分工 | 代码波指定 sonnet | 每个角色 agent 各有可选的 `model` 字段,安装时指定;不指定就跟随会话默认模型 |
 | code → review 衔接 | base-code 入口可选 `code 且自动 review`,同会话直接审查 | 保留,状态里记 `stages.code.mode`。简化版多一条保护:`coder` 降级为内联时不自动衔接,走阶段闸门并开新会话 |
-| 审查重审 | 增量 + verify 模式 + 遗留项 | 首轮全量;修复后只审增量(`fixBase..HEAD`),只核对本轮圈定的编号和修复引入的新问题,读上轮报告而不重读技术方案,只重派修过的 group;diff 排除锁文件与构建产物;不维护遗留项;修复循环上限仍为 2 轮 |
+| 审查重审 | 增量 + verify 模式 + 遗留项 | 首轮全量;修复后只审增量(`fixBase..HEAD`),只核对本轮圈定的编号和修复引入的新问题,读上轮报告而不重读技术方案,只重派修过的 group;每个 group 只保留一份报告 `review-{g}.md`,每轮覆盖;diff 排除锁文件与构建产物;不维护遗留项;修复循环上限仍为 2 轮 |
 | 并行 | 按执行单元并行 | 执行单元 = repo:同 repo 的 group 串行(共用分支,提交不能交叉),不同 repo 的计划、实现、修复并行(≤3,同一条消息内发起);探索、审查只读,按 group 并行 |
 | 前端原型 | 可调用 `frontend-design` | 保留"低保真/高保真"选项,由主会话直接写 HTML |
 
@@ -39,7 +39,7 @@ install.ps1
 
 安装后新开一个会话,输入 `/` 应能看到 `base-prod`、`base-tech`、`base-code`、`base-review`。
 
-同名时工作区优先于全局。**自定义 agent 默认不加载技能**:若你在用自定义主 agent,需在它的 `resources` 加 `skill://.kiro/skills/*/SKILL.md`(全局技能再加 `skill://~/.kiro/skills/*/SKILL.md`)。本流程的四个子代理**不需要**配 `resources`:它们只读主会话写好的任务单,不依赖技能。
+同名时工作区优先于全局。**自定义 agent 默认不加载技能**:若你在用自定义主 agent,需在它的 `resources` 加 `skill://.kiro/skills/*/SKILL.md`(全局技能再加 `skill://~/.kiro/skills/*/SKILL.md`)。本流程的四个子代理**不需要**配 `resources`:任务单由主会话填好变量后直接作为消息发给它们(不落盘),不依赖技能。
 
 ### 指定子代理模型
 
@@ -65,7 +65,7 @@ install.ps1
 3. 新会话 `/base-code` 写计划与代码 → 通过
 4. 新会话 `/base-review` 审查、修复、合并
 
-每阶段结束都有闸门(通过 / 不通过 / 跳过),状态在 `{工作区}/.base/dev/{flowId}-flow-state.json`,产物在 `{工作区}/.base/dev/{flowId}-outputs/`。中途中断后重新运行同一技能即可续作。
+每阶段结束都有闸门(通过 / 不通过 / 跳过),状态在 `{工作区}/.base/dev/{flowId}-flow-state.json`,产物在 `{工作区}/.base/dev/{flowId}-outputs/`(只写流程必需的文件:prod-design、tech-explore、tech-design、被依赖时的 api-contract、impl-plan、review 报告)。中途中断后重新运行同一技能即可续作。
 
 ## 子代理:怎么保证"一定能用"
 

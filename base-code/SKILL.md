@@ -40,7 +40,7 @@ description: 计划与代码阶段。已有 tech-design、要生成实现计划�
 ### 2.1 计划
 
 - `progress.{g}.step` 已是 `planned` 或 `coded`(续作)→ 跳过。
-- 读 `references/brief-plan.md`,任务单写到 `{flowDir}/briefs/plan-{g}.md`,委派 planner 角色 `base-planner`(预检见 §5.2)。变量:`group`、`workDir`、`branch`、`planPath`(`{flowDir}/impl-plan-{g}.md`)、`design`、`apiContracts`(本 group 的 + 依赖 group 的,有才列)、`explore`、`existingPlan` 与 `revisionNote`(重做才有,否则"无")。多个 group 的计划互相独立且只读,可并行(≤3 个);不同执行单元的计划优先并行,同单元内的 group 串行。
+- 读 `references/brief-plan.md`,填好变量后按协议 §5.3 委派 planner 角色 `base-planner`(预检见 §5.2)。变量:`group`、`workDir`、`branch`、`planPath`(`{flowDir}/impl-plan-{g}.md`)、`design`、`apiContracts`(本 group 的 + 依赖 group 的,有才列)、`explore`、`existingPlan` 与 `revisionNote`(重做才有,否则"无")。多个 group 的计划互相独立且只读,可并行(≤3 个);不同执行单元的计划优先并行,同单元内的 group 串行。
 - 拿到结果后展示计划摘要(任务数、文件数、风险),**不读计划全文**,写 `step="planned"`,然后**直接进入 2.2,不询问**。只有两种情况停下按协议 §3 问:
   - 返回 `blocked`:`补信息后重派` / `回退到 base-tech` / `取消`。仓库无测试框架时 planner 也会走这里,选项里补一条 `不写自动化测试(本次)`,选它就把"用户确认本次不写自动化测试"写进 `revisionNote` 重派。
   - 计划任务数明显偏离方案(如方案 3 个模块、计划只列 1 个)。
@@ -49,7 +49,7 @@ description: 计划与代码阶段。已有 tech-design、要生成实现计划�
 
 1. 记 `roundBase = git -C {repo} rev-parse HEAD` 写入 `progress.{g}.roundBase`。**已有值不重取**(续作时它决定本轮提交校验的范围)。**同一 repo 的 group 共用这一个值**:单元内第二个 group 直接复用第一个的 `roundBase`,不重新取。
    **不同 repo 的单元并行**:每个单元各跑 2.1 → 2.2,彼此不等待;同一单元内严格按拓扑串行。
-2. 读 `references/brief-code.md`,任务单写到 `{flowDir}/briefs/code-{g}.md`,委派 coder 角色 `base-coder`。变量:`group`、`workDir`、`branch`、`planPath`、`doneTasks`(续作时填计划里已勾选 `[x]` 的任务标题与 `git log --oneline {roundBase}..HEAD`,否则"无")。
+2. 读 `references/brief-code.md`,填好变量后按协议 §5.3 委派 coder 角色 `base-coder`。变量:`group`、`workDir`、`branch`、`planPath`、`doneTasks`(续作时填计划里已勾选 `[x]` 的任务标题与 `git log --oneline {roundBase}..HEAD`,否则"无")。
 3. 核对返回值:
    - `checks` 含 `fail` 却报 `done` → 按 `blocked`。
    - `tdd` 的分子小于分母 → 不算失败,但在闸门摘要里如实列出("有 N 个任务未能先红后绿"),交给用户判断。

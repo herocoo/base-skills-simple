@@ -7,7 +7,7 @@
 - **技能目录**:含本技能 `SKILL.md` 的目录。`references/…`、`assets/…` 相对它读取,读不到依次试 `.kiro/skills/{技能名}/`(工作区)、`~/.kiro/skills/{技能名}/`(全局)。
 - **`{root}`**:工作区根目录绝对路径(首次用 `pwd`,PowerShell 用 `Get-Location` 确认)。**`{flowDir}`** = `{root}/.base/dev/{flowId}-outputs/`,存放全部阶段产物;**`{statePath}`** = `{root}/.base/dev/{flowId}-flow-state.json`,状态文件,与产物目录并列,不放进产物目录。**读写一律用绝对路径。**阶段产物(含 demo.html 原型)只写进 `{flowDir}`,不写进工作区根目录或"涉及项目"的目录。
 - **阶段** `prod → tech → code → review` 各为独立技能,只经 `{statePath}` 衔接。
-- **产物文件名固定,不登记进 flow-state.json**:`prod-design.md`、`demo.html`(可选)、`tech-explore-{g}.md`、`tech-converge-{g}.md`、`tech-design-{g}.md`、`api-contract-{g}.md`、`impl-plan-{g}.md`、`review-{g}.md`(第 N 轮 `review-{g}-rN.md`)、`briefs/*.md`。`{g}` = group 名。
+- **产物文件名固定,不登记进 flow-state.json**:`prod-design.md`、`demo.html`(可选)、`tech-explore-{g}.md`、`tech-design-{g}.md`(末尾含决策记录)、`api-contract-{g}.md`(仅被其他 group 依赖时)、`impl-plan-{g}.md`、`review-{g}.md`(每轮覆盖)。`{g}` = group 名。**只写流程必需的文件**:任务单不落盘,收敛结论写进 tech-design,不另建中间文档。
 - "读/写文件""执行命令"指客户端内置工具,不硬编码工具名。Windows 的 shell 是 PowerShell:多条命令分开执行,不用 `&&`、`$(...)`。
 - 不依赖提问工具、todo 工具、其他技能与插件:提问按 §3 在正文里完成,进度靠 flow-state.json 与计划里的复选框。
 
@@ -107,13 +107,13 @@ agent 是 `{root}/.kiro/agents/{agent}.json` 或 `~/.kiro/agents/{agent}.json`,J
 
 ### 5.3 委派(`subagent.{角色} == "custom"`)
 
-1. 读本技能 `references/brief-*.md` 任务单模板,把 `{{变量}}` 全部替换成实际值(绝对路径),写入 `{flowDir}/briefs/{类型}-{g}.md`(`briefs` 目录不存在先建)。
-2. 发消息:`使用 {agent} 子代理执行任务单 {绝对路径}。严格按任务单做,完成后只输出任务单规定的"完成标志"。`并行时:`下面 N 个任务相互独立,请并行委派给 {agent}:{路径1}、{路径2}`。
+1. 读本技能 `references/brief-*.md` 任务单模板,把 `{{变量}}` 全部替换成实际值(绝对路径),**不写文件**。
+2. 委派消息 = 一行 `使用 {agent} 子代理执行下面的任务单。严格照做,完成后只输出任务单规定的"完成标志"。` + 空行 + 任务单全文。并行时每个任务各发一次委派,**在同一条消息内发起**。
 3. 返回后核对"完成标志"字段是否齐全;缺失或与产物/git 不符时以实况为准,仍无法判断按 `blocked` 处理。
 
 ### 5.4 内联(`subagent.{角色} == "inline"`)
 
-主会话按同一份任务单模板执行:替换变量后照做,遵守其中全部约束,同样输出"完成标志"各行,可不写 briefs 文件。代价是读写量落在主会话上下文,每个 group 完成后建议开新会话再继续(进度在 flow-state.json 与计划复选框里,可续作)。
+主会话按同一份任务单模板执行:替换变量后照做,遵守其中全部约束,同样输出"完成标志"各行。代价是读写量落在主会话上下文,每个 group 完成后建议开新会话再继续(进度在 flow-state.json 与计划复选框里,可续作)。
 
 ## 6. 级联失效与回退
 
