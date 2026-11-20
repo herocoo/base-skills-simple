@@ -24,7 +24,8 @@ base-prod/ base-tech/ base-code/ base-review/   四个技能(SKILL.md + referenc
 agents/base-*.json                              四个角色子代理定义,JSON 格式(可选安装)
 shared/protocol.md                              协议唯一源,install.ps1 安装时同步到四个技能
 models.json                                     各角色模型 ID(填了就写进对应 agent;null 表示不指定)
-install.ps1
+install.ps1                                     Windows 安装脚本
+install.sh                                      Linux / macOS 安装脚本(功能与 install.ps1 对等)
 ```
 
 每个技能里的 `references/protocol.md` 是 `shared/protocol.md` 的相同副本:技能需要自包含,不跨技能读文件。
@@ -35,6 +36,21 @@ install.ps1
 .\install.ps1                  # 默认装到 ~\.kiro\(全局,所有项目可用)
 .\install.ps1 -Target D:\proj  # 装到指定工作区 D:\proj\.kiro\(可随仓库提交共享);当前目录用 -Target .
 .\install.ps1 -Check           # 只检查,不改动(会显示每个 agent 当前的 model)
+```
+
+Linux / macOS(需要 bash;有 python3 或 jq 时会额外校验 JSON):
+
+```bash
+bash install.sh                        # 默认装到 ~/.kiro/(全局,所有项目可用)
+bash install.sh --target ~/proj        # 装到指定工作区 ~/proj/.kiro/;当前目录用 --target .
+bash install.sh --check                # 只检查,不改动
+bash install.sh --coder-model <ID> --reviewer-model <ID>   # 指定模型,优先于 models.json
+```
+
+一行命令(克隆并安装,不保留源码目录):
+
+```bash
+git clone --depth 1 https://github.com/herocoo/base-skills-simple.git /tmp/base-skills-simple && bash /tmp/base-skills-simple/install.sh && rm -rf /tmp/base-skills-simple
 ```
 
 安装后新开一个会话,输入 `/` 应能看到 `base-prod`、`base-tech`、`base-code`、`base-review`。
